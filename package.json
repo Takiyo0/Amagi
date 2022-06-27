@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "A lavalink track search module",
   "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "test/index.js",
     "build:full": "npm run lint && npm run format && npm run build:docs && npm run build",
