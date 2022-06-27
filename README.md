@@ -1,12 +1,12 @@
 # Amagi
 #### A lavalink search wrapper. Fully customizable
-Take note this module only handles search, not playing music, thus it's customizable
+Take note this module only handles search, not playing music, thus it's customizable. 
 
 ![Amagi](https://i.imgur.com/4ZefZpU.png)
 > Amagi © Azur Lane
 
 ## Features
-Hmm not much tbh
+Hmm not much tbh   
 ✓ Easy to use  
 ✓ Pretty stable  
 ✓ Author is responsible with bugs*   
