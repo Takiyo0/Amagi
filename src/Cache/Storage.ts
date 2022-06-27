@@ -34,6 +34,10 @@ export class StorageCache {
     for (const key in keys) this.delete(key);
   }
 
+  public total(): number {
+    return this.cache.all().length;
+  }
+
   protected save(): void {
     this.cache.save();
   }

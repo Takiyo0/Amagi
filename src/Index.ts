@@ -101,6 +101,24 @@ export class Amagi extends EventEmitter {
   }
 
   /**
+   * Get node's and cache status
+   * @returns Promise<Status>
+   */
+  public async getStatus(): Promise<Status> {
+    const nodes = Array.from(this.nodes.values());
+    const status: Status = {
+      nodes: await Promise.all(nodes.map((node) => node.getStatus())),
+      cache: {
+        enabled: this.options.cache?.enabled ?? false,
+        type: this.options.cache?.type ?? 'memory',
+        timeout: this.options.cache?.timeout ?? -1,
+        total: this.cache.cache.total(),
+      },
+    };
+    return status;
+  }
+
+  /**
    * Get a random node.
    * @returns The random node.
    */
@@ -144,6 +162,27 @@ export class Amagi extends EventEmitter {
       ...options,
     };
   }
+}
+
+export interface Status {
+  nodes: NodeStatus[];
+  cache: CacheStatus;
+}
+
+export interface CacheStatus {
+  enabled: boolean;
+  type: 'memory' | 'storage';
+  timeout: number;
+  total: number;
+}
+
+export interface NodeStatus {
+  identifier: string;
+  status: {
+    rateLimited: boolean;
+    dead: boolean;
+    latency: number;
+  };
 }
 
 export type LoadType = 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';

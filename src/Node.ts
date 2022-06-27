@@ -1,4 +1,4 @@
-import { Amagi, AmagiEvents, Node as AmagiNode } from './Index';
+import { Amagi, AmagiEvents, Node as AmagiNode, NodeStatus } from './Index';
 import Undici from 'undici';
 
 export class Node {
@@ -30,6 +30,23 @@ export class Node {
   public enable(): Node {
     this.rateLimited = false;
     return this;
+  }
+
+  public async getStatus(): Promise<NodeStatus> {
+    let time = process.hrtime();
+    const response = await this.request('GET', '/');
+    time = process.hrtime(time);
+
+    const dead = response.status !== 400;
+
+    return {
+      identifier: this.name,
+      status: {
+        rateLimited: this.rateLimited,
+        dead,
+        latency: time[1] / 1000000,
+      },
+    };
   }
 
   /** Validate the password */

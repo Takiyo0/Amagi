@@ -28,4 +28,8 @@ export class MemoryCache {
   public clear(): void {
     this.cache = {};
   }
+
+  public total(): number {
+    return Object.keys(this.cache).length;
+  }
 }
