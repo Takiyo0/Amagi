@@ -21,15 +21,24 @@ export declare interface Amagi {
 }
 
 export class Amagi extends EventEmitter {
+  /**All nodes */
   public readonly nodes: Map<string, NodeManager> = new Map();
+  /** The cache manager */
   public readonly cache: CacheManager;
+  /** Whether the module is loaded */
   private loaded: boolean = false;
+
   protected readonly engines: { [key: string]: string } = {
     youtube: 'ytsearch:',
     youtubeMusic: 'ytmsearch:',
     soundcloud: 'scsearch:',
   };
 
+  /**
+   * Initialize the module.
+   * @param _nodes The nodes to use.
+   * @param options AmagiOptions
+   */
   constructor(private readonly _nodes: Node[], public readonly options?: AmagiOptions) {
     super();
     this.cache = new CacheManager(this);
@@ -42,6 +51,12 @@ export class Amagi extends EventEmitter {
     }
   }
 
+  /**
+   * Search a song
+   * @param query The query to search for.
+   * @param options SearchOptions
+   * @returns The search results.
+   */
   public async search(query: string, options: SearchOptions): Promise<SearchResult> {
     if (!this.loaded) throw new Error('Nodes not loaded');
 
@@ -82,11 +97,19 @@ export class Amagi extends EventEmitter {
     return { ...results, nodeUsed: node.name };
   }
 
+  /**
+   * Get a random node.
+   * @returns The random node.
+    */
   private getRandomNode(): NodeManager {
     const nodeArray = Array.from(this.nodes.values()).filter((node) => !node.rateLimited);
     return nodeArray[Math.floor(Math.random() * nodeArray.length)];
   }
 
+  /**
+   * Initialize the module.
+   * @returns void
+   */
   public async init(): Promise<void> {
     if (this.loaded) return;
 
@@ -129,16 +152,21 @@ export interface SearchOptions {
 }
 
 export interface SearchResult {
+  /**Result loadType */
   loadType: LoadType;
+  /** Playlist info if exist */
   playlistInfo: {
     name?: string;
     selectedTrack?: number;
   };
+  /** Track results */
   tracks: Track[] | any[];
+  /** Exception if exist */
   exception?: {
     message: string;
     severity: string;
   };
+  /** Node used */
   nodeUsed: string;
 }
 
