@@ -1,6 +1,6 @@
 {
   "name": "amagi",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lavalink track search module",
   "main": "dist/index.js",
   "files": [
@@ -23,6 +23,7 @@
     "lavalink-search",
     "lavalink-track",
     "lavalink-searcher",
+    "lavalink-rate-limit",
     "discord"
   ],
   "author": "Takiyo",
