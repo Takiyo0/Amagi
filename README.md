@@ -48,7 +48,7 @@ const amagi = new Amagi(NODES, {
         type: 'memory'
     },
     modifyTracks: (track) => ({ track: track.track, title: track.info.title })
-});
+}); // see all available options here https://takiyo0.github.io/Amagi/interfaces/Index.AmagiOptions.html
 
 // Scientific purpose
 amagi.on('debug', console.log);
