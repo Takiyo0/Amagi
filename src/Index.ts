@@ -25,6 +25,8 @@ export class Amagi extends EventEmitter {
   public readonly nodes: Map<string, NodeManager> = new Map();
   /** The cache manager */
   public readonly cache: CacheManager;
+  /** Amagi options */
+  public readonly options: AmagiOptions;
   /** Whether the module is loaded */
   private loaded: boolean = false;
 
@@ -39,8 +41,9 @@ export class Amagi extends EventEmitter {
    * @param _nodes The nodes to use.
    * @param options AmagiOptions
    */
-  constructor(private readonly _nodes: Node[], public readonly options?: AmagiOptions) {
+  constructor(private readonly _nodes: Node[], options?: AmagiOptions) {
     super();
+    this.options = this.mergeDefaults(options);
     this.cache = new CacheManager(this);
 
     if (this.options?.plugins) {
@@ -126,6 +129,21 @@ export class Amagi extends EventEmitter {
     this.emit(AmagiEvents.DEBUG, `${this.nodes.size} nodes loaded`);
     this.loaded = true;
   }
+
+  protected mergeDefaults(options?: AmagiOptions): AmagiOptions {
+    return {
+      defaultEngine: 'youtube',
+      modifyTracks: undefined,
+      plugins: [],
+      ignoreDeadNode: false,
+      cache: {
+        enabled: false,
+        type: 'memory',
+        timeout: -1,
+      },
+      ...options,
+    };
+  }
 }
 
 export type LoadType = 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED';
@@ -190,7 +208,10 @@ export interface AmagiOptions {
   defaultEngine?: SearchEngines;
   /** If you want to modify track result to something else */
   modifyTracks?: (track: Track | undefined) => any;
-  plugins?: any[] /** Plugins */;
+  /** Plugins */
+  plugins?: any[];
+  /** Ignore a dead node on init by not throwing an error. Default to false */
+  ignoreDeadNode?: boolean;
 }
 
 export interface Node {
