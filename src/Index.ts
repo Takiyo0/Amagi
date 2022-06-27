@@ -21,7 +21,7 @@ export declare interface Amagi {
 }
 
 export class Amagi extends EventEmitter {
-  /**All nodes */
+  /** All nodes */
   public readonly nodes: Map<string, NodeManager> = new Map();
   /** The cache manager */
   public readonly cache: CacheManager;
@@ -100,7 +100,7 @@ export class Amagi extends EventEmitter {
   /**
    * Get a random node.
    * @returns The random node.
-    */
+   */
   private getRandomNode(): NodeManager {
     const nodeArray = Array.from(this.nodes.values()).filter((node) => !node.rateLimited);
     return nodeArray[Math.floor(Math.random() * nodeArray.length)];
@@ -152,7 +152,7 @@ export interface SearchOptions {
 }
 
 export interface SearchResult {
-  /**Result loadType */
+  /** Result loadType */
   loadType: LoadType;
   /** Playlist info if exist */
   playlistInfo: {
@@ -190,7 +190,7 @@ export interface AmagiOptions {
   defaultEngine?: SearchEngines;
   /** If you want to modify track result to something else */
   modifyTracks?: (track: Track | undefined) => any;
-  plugins?: any[];  /** Plugins */
+  plugins?: any[] /** Plugins */;
 }
 
 export interface Node {
