@@ -1,5 +1,5 @@
 # Amagi
-#### A lavalink search wrapper. Fully customizable
+#### A lavalink search wrapper with ratelimit protection. Fully customizable
 Take note this module only handles search, not playing music, thus it's customizable. 
 
 ![Amagi](https://i.imgur.com/4ZefZpU.png)
@@ -12,6 +12,7 @@ Hmm not much tbh
 ✓ Author is responsible with bugs*   
 ✓ Cache support**   
 ✓ Customizable***   
+✓ Auto-disable rate limited node and use another    
 ✓ Anime character 💖💖💖💖
 
 ## Documentation
@@ -57,7 +58,7 @@ amagi.on('request', console.log);
 amagi.init().then(run);
 
 function run() {
-    amagi.search('https://open.spotify.com/playlist/6wBzITdjD5TV6hlANVXCPQ?si=b0732558348a46ef', { engine: 'youtubeMusic' }).then(r => console.log(r)).catch(e => console.log(e));
+    amagi.search('wonder caravan', { engine: 'youtubeMusic' }).then(r => console.log(r)).catch(e => console.log(e));
 }
 ```
 
