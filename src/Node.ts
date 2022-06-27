@@ -6,28 +6,40 @@ export class Node {
 
   constructor(protected readonly node: AmagiNode, private readonly amagi: Amagi) {}
 
+  /** Get Node's url */
   protected get url(): string {
     return `${this.node.secure ? 'https' : 'http'}://${this.node.host}`;
   }
 
+  /** Get node's password */
   protected get password(): string {
     return this.node.auth;
   }
 
+  /** Get node's name/identifier */
   public get name(): string {
     return this.node.identifier ?? this.node.host;
   }
 
+  /** Make a get request */
   public async get<T = unknown>(path: string, params?: { [key: string]: any }[]): Promise<T> {
     return this.request('GET', path, params).then((response) => response.json()) as Promise<T>;
   }
 
+  /** Enable a ratelimited node in case the issue has been fixed */
+  public enable(): Node {
+    this.rateLimited = false;
+    return this;
+  }
+
+  /** Validate the password */
   public async validateNode(): Promise<void> {
     const response = await this.request('GET', '/');
     if (response.status !== 400) throw new Error('Invalid node');
     this.amagi.emit(AmagiEvents.DEBUG, `Node ${this.name} validated`);
   }
 
+  /** Make a request to node */
   public async request(method: string, path: string, params?: { [key: string]: any }[]): Promise<any> {
     let url = this.url + path;
     const options = {
