@@ -35,8 +35,10 @@ export class Node {
   /** Validate the password */
   public async validateNode(): Promise<void> {
     const response = await this.request('GET', '/');
-    if (response.status !== 400) throw new Error('Invalid node');
-    this.amagi.emit(AmagiEvents.DEBUG, `Node ${this.name} validated`);
+    if (response.status !== 400 && !this.amagi.options.ignoreDeadNode) throw new Error('Invalid node');
+    else if (response.status !== 400 && this.amagi.options.ignoreDeadNode)
+      this.amagi.emit(AmagiEvents.DEBUG, `Node ${this.name} failed to validate`);
+    else this.amagi.emit(AmagiEvents.DEBUG, `Node ${this.name} validated`);
   }
 
   /** Make a request to node */
