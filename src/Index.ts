@@ -73,11 +73,13 @@ export class Amagi extends EventEmitter {
     if (!isUrl) query = `${options.engine}${query}`;
 
     if (this.cache.enabled) {
-      const cached = await this.cache.cache.get<SearchResult>(query);
+      const cached = this.cache.cache.get<SearchResult>(query);
 
       if (cached) {
         this.emit(AmagiEvents.DEBUG, `Cache hit for ${query}`);
         cached.nodeUsed = 'cache';
+        if (this.options?.modifyTracks && typeof this.options.modifyTracks === 'function')
+          cached.tracks = cached.tracks.map((t) => this.options!.modifyTracks!(t as Track));
         return cached;
       }
     }
@@ -93,10 +95,11 @@ export class Amagi extends EventEmitter {
       results = await _node.get<SearchResult>(`/loadtracks`, [{ identifier: query }]);
     }
 
+    if (this.cache.enabled) this.cache.cache.set(query, results);
+
     if (this.options?.modifyTracks && typeof this.options.modifyTracks === 'function')
       results.tracks = results.tracks.map((t) => this.options!.modifyTracks!(t as Track));
 
-    if (this.cache.enabled) this.cache.cache.set(query, results);
     return { ...results, nodeUsed: node.name };
   }
 
@@ -124,6 +127,7 @@ export class Amagi extends EventEmitter {
    */
   private getRandomNode(): NodeManager {
     const nodeArray = Array.from(this.nodes.values()).filter((node) => !node.rateLimited);
+    if (!nodeArray.length) throw new Error('No nodes available');
     return nodeArray[Math.floor(Math.random() * nodeArray.length)];
   }
 
@@ -246,11 +250,18 @@ export interface AmagiOptions {
   /** The default search engine */
   defaultEngine?: SearchEngines;
   /** If you want to modify track result to something else */
-  modifyTracks?: (track: Track | undefined) => any;
+  modifyTracks?: (track: Track) => any;
   /** Plugins */
   plugins?: any[];
   /** Ignore a dead node on init by not throwing an error. Default to false */
   ignoreDeadNode?: boolean;
+  /** Request configuration */
+  request?: {
+    /** Request timeout. Default to 10000ms. (in ms) */
+    timeout?: number;
+    /** Retry amount. Default to nodes length */
+    retry?: number;
+  }
 }
 
 export interface Node {
