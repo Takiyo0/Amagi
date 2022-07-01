@@ -33,6 +33,7 @@
   },
   "homepage": "https://github.com/Takiyo0/Amagi#readme",
   "dependencies": {
+    "abort-controller": "^3.0.0",
     "flat-cache": "^3.0.4",
     "undici": "^5.5.1"
   },
