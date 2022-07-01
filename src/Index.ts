@@ -66,7 +66,7 @@ export class Amagi extends EventEmitter {
     options = options ?? {};
     options.engine = this.engines[options.engine ?? this.options?.defaultEngine ?? 'youtube'] as SearchEngines;
 
-    const node = this.getRandomNode();
+    let node = this.getRandomNode();
     if (!node) throw new Error('No nodes available');
 
     const isUrl = /^(http|https):\/\//.test(query);
@@ -84,7 +84,35 @@ export class Amagi extends EventEmitter {
       }
     }
 
-    let results = await node.get<SearchResult>(`/loadtracks`, [{ identifier: query }]);
+    let results: SearchResult | undefined;
+
+    let nodeUsed = node.name;
+    let triesLeft =
+      (this.options.request?.retry && this.options.request.retry > this.nodes.size
+        ? this.nodes.size
+        : this.options.request?.retry) ?? Array.from(this.nodes.values()).filter((n) => !n.rateLimited).length;
+    const failedNodes = [];
+
+    while (!results && triesLeft) {
+      this.emit(AmagiEvents.DEBUG, `Searching ${query} on ${nodeUsed}`);
+      let errorMessage = null;
+      const result = await node.get<SearchResult>(`/loadtracks`, [{ identifier: query }]).catch((e) => {
+        errorMessage = e.message;
+        return undefined;
+      });
+      if (!result && errorMessage) {
+        this.emit(AmagiEvents.DEBUG, `${nodeUsed} returned error: ${errorMessage}; ${triesLeft} tries left`);
+        failedNodes.push(nodeUsed);
+        node = this.getRandomNode(failedNodes);
+        if (!node) throw new Error('No nodes available');
+        nodeUsed = node.name;
+        triesLeft--;
+      } else {
+        results = result;
+      }
+    }
+
+    if (!results) throw new Error('No results');
 
     while (results.loadType === 'LOAD_FAILED' && results.exception && results.exception.message.includes('429')) {
       this.emit(AmagiEvents.DEBUG, `${node.name} rate limited, using another node...`);
@@ -125,8 +153,10 @@ export class Amagi extends EventEmitter {
    * Get a random node.
    * @returns The random node.
    */
-  private getRandomNode(): NodeManager {
-    const nodeArray = Array.from(this.nodes.values()).filter((node) => !node.rateLimited);
+  private getRandomNode(except?: string[]): NodeManager {
+    const nodeArray = Array.from(this.nodes.values()).filter(
+      (node) => !node.rateLimited && !except?.includes(node.name),
+    );
     if (!nodeArray.length) throw new Error('No nodes available');
     return nodeArray[Math.floor(Math.random() * nodeArray.length)];
   }
@@ -261,7 +291,7 @@ export interface AmagiOptions {
     timeout?: number;
     /** Retry amount. Default to nodes length */
     retry?: number;
-  }
+  };
 }
 
 export interface Node {
