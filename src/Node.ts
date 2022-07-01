@@ -1,5 +1,6 @@
 import { Amagi, AmagiEvents, Node as AmagiNode, NodeStatus } from './Index';
 import Undici from 'undici';
+import AbortController from 'abort-controller';
 
 export class Node {
   public rateLimited: boolean = false;
@@ -34,7 +35,7 @@ export class Node {
 
   public async getStatus(): Promise<NodeStatus> {
     let time = process.hrtime();
-    const response = await this.request('GET', '/');
+    const response = await this.request('GET', '/').catch(() => ({ status: 500 }));
     time = process.hrtime(time);
 
     const dead = response.status !== 400;
@@ -51,7 +52,7 @@ export class Node {
 
   /** Validate the password */
   public async validateNode(): Promise<void> {
-    const response = await this.request('GET', '/');
+    const response = await this.request('GET', '/').catch(() => ({ status: 500 }));
     if (response.status !== 400 && !this.amagi.options.ignoreDeadNode) throw new Error('Invalid node');
     else if (response.status !== 400 && this.amagi.options.ignoreDeadNode)
       this.amagi.emit(AmagiEvents.DEBUG, `Node ${this.name} failed to validate`);
@@ -60,6 +61,10 @@ export class Node {
 
   /** Make a request to node */
   public async request(method: string, path: string, params?: { [key: string]: any }[]): Promise<any> {
+    const abort = new AbortController();
+
+    setTimeout(() => abort.abort(), this.amagi.options.request?.timeout ?? 10 * 1000);
+
     let url = this.url + path;
     const options = {
       method,
@@ -74,7 +79,7 @@ export class Node {
       url = url.slice(0, -1);
     }
     const time = process.hrtime();
-    const response = await Undici.fetch(url, options);
+    const response = await Undici.fetch(url, { ...options, signal: abort.signal as AbortSignal });
     this.amagi.emit(
       AmagiEvents.REQUEST,
       `
