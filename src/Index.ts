@@ -126,7 +126,7 @@ export class Amagi extends EventEmitter {
     if (this.cache.enabled) this.cache.cache.set(query, results);
 
     if (this.options?.modifyTracks && typeof this.options.modifyTracks === 'function')
-      results.tracks = results.tracks.map((t) => this.options!.modifyTracks!(t as Track));
+      results.tracks = results.tracks.map((t) => this.options!.modifyTracks!(t as Track)).filter((t) => !!t);
 
     return { ...results, nodeUsed: node.name };
   }
@@ -167,6 +167,7 @@ export class Amagi extends EventEmitter {
    */
   public async init(): Promise<void> {
     if (this.loaded) return;
+    this.loaded = true;
 
     this.emit(AmagiEvents.DEBUG, 'Validating nodes...');
     await Promise.all(
@@ -179,7 +180,6 @@ export class Amagi extends EventEmitter {
     );
 
     this.emit(AmagiEvents.DEBUG, `${this.nodes.size} nodes loaded`);
-    this.loaded = true;
   }
 
   protected mergeDefaults(options?: AmagiOptions): AmagiOptions {
