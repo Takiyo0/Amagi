@@ -5,7 +5,7 @@ import AbortController from 'abort-controller';
 export class Node {
   public rateLimited: boolean = false;
 
-  constructor(protected readonly node: AmagiNode, private readonly amagi: Amagi) {}
+  constructor(protected readonly node: AmagiNode, private readonly amagi: Amagi) { }
 
   /** Get Node's url */
   protected get url(): string {
@@ -79,7 +79,7 @@ export class Node {
       url = url.slice(0, -1);
     }
     const time = process.hrtime();
-    const response = await Undici.fetch(url, { ...options, signal: abort.signal as AbortSignal });
+    const response = await Undici.fetch(url, { ...options, signal: abort.signal as AbortSignal }).catch(() => { throw new Error('Request failed') });
     this.amagi.emit(
       AmagiEvents.REQUEST,
       `
