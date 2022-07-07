@@ -1,8 +1,9 @@
 {
   "name": "amagi",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "A lavalink track search module",
-  "main": "dist/index.js",
+  "main": "dist/Index.js",
+  "typings": "dist/Index.d.ts",
   "files": [
     "dist"
   ],
