@@ -1,6 +1,6 @@
 import { Amagi, AmagiEvents, Node as AmagiNode, NodeStatus } from './Index';
 import Undici from 'undici';
-import AbortController from 'abort-controller';
+import Aborter from 'abort-controller';
 
 export class Node {
   public rateLimited: boolean = false;
@@ -61,7 +61,7 @@ export class Node {
 
   /** Make a request to node */
   public async request(method: string, path: string, params?: { [key: string]: any }[]): Promise<any> {
-    const abort = new AbortController();
+    const abort = AbortController ? new AbortController() : new Aborter();
 
     setTimeout(() => abort.abort(), this.amagi.options.request?.timeout ?? 10 * 1000);
 
